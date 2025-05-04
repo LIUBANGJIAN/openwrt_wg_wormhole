@@ -1,29 +1,43 @@
-.PHONY: all binary
+include $(TOPDIR)/rules.mk
 
-binary:
-	@ echo; echo "### $@:"
-	go build -o wormhole ./cmd
+PKG_NAME:=wg-wormhole
+PKG_VERSION:=1.0
+PKG_RELEASE:=1
 
-install-node: binary
-	@ echo; echo "### $@:"
-	cp wormhole /usr/local/bin/
-	cp deploy/node.service /usr/lib/systemd/system/wormhole-node.service
-	sudo systemctl daemon-reload
-	sudo systemctl restart wormhole-node
-	sudo systemctl enable wormhole-node.service
+PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)
 
-install-registry: binary
-	@ echo; echo "### $@:"
-	cp wormhole /usr/local/bin/
-	cp deploy/registry.service /usr/lib/systemd/system/wormhole-registry.service
-	sudo systemctl daemon-reload
-	sudo systemctl restart wormhole-registry
-	sudo systemctl enable wormhole-registry.service
+include $(INCLUDE_DIR)/package.mk
 
-clean:
-	@ echo; echo "### $@:"
-	rm wormhole
+define Package/wg-wormhole
+  SECTION:=net
+  CATEGORY:=Network
+  TITLE:=wg-wormhole - A UDP hole punching tool based on WireGuard
+  DEPENDS:=+wireguard-tools
+endef
 
-code-gen:
-	@ echo; echo "### $@:"
-	bash proto/getCode.sh
+define Package/wg-wormhole/description
+  wg-wormhole is a UDP hole punching tool based on WireGuard.
+endef
+
+define Build/Prepare
+    mkdir -p $(PKG_BUILD_DIR)
+    $(CP) ./ $(PKG_BUILD_DIR)/
+endef
+
+define Build/Configure
+endef
+
+define Build/Compile
+    $(GO_HOST) build -o $(PKG_BUILD_DIR)/wormhole ./cmd
+endef
+
+define Package/wg-wormhole/install
+    $(INSTALL_DIR) $(1)/usr/bin
+    $(INSTALL_BIN) $(PKG_BUILD_DIR)/wormhole $(1)/usr/bin/wg-wormhole
+    # 安装服务文件（如果需要）
+    $(INSTALL_DIR) $(1)/etc/init.d
+    $(INSTALL_BIN) ./deploy/wormhole-node.init $(1)/etc/init.d/wormhole-node
+    $(INSTALL_BIN) ./deploy/wormhole-registry.init $(1)/etc/init.d/wormhole-registry
+endef
+
+$(eval $(call BuildPackage,wg-wormhole))
