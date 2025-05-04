@@ -1,19 +1,14 @@
-[Unit]
-Description=wg-wormhole registry service
-After=network.target
-Wants=network.target
+#!/bin/sh /etc/rc.common
 
-[Service]
-# This service runs as root. You may consider to run it as another user for security concerns.
-# Client Env Vars
-Environment=DEBUG=0
+START=99
+STOP=10
 
-Type=simple
-ExecStart=/usr/local/bin/wormhole node -a your.registry.domain.or.ip:1638 -t replace_this_with_your_own_token
+start() {
+    echo "Starting wg-wormhole node..."
+    /usr/bin/wg-wormhole node -a your.registry.domain.or.ip:1638 -t your_token
+}
 
-Restart=on-failure
-# Don't restart in the case of configuration error
-RestartPreventExitStatus=23
-
-[Install]
-WantedBy=multi-user.target
+stop() {
+    echo "Stopping wg-wormhole node..."
+    killall wg-wormhole
+}
