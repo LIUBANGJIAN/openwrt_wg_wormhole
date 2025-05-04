@@ -1,3 +1,8 @@
+# Copyright (C) 2023  OpenWRT Contributors
+# 
+# This is free software, licensed under the Apache License, Version 2.0 .
+#
+
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=wg_wormhole
@@ -21,14 +26,14 @@ endef
 
 define Build/Prepare
     mkdir -p $(PKG_BUILD_DIR)
-    $(CP) ./ $(PKG_BUILD_DIR)/
-endef
-
-define Build/Configure
+    $(CP) ./cmd $(PKG_BUILD_DIR)/cmd
+    $(CP) ./go.mod $(PKG_BUILD_DIR)/go.mod
+    $(CP) ./go.sum $(PKG_BUILD_DIR)/go.sum
+    cd $(PKG_BUILD_DIR) && go mod tidy
 endef
 
 define Build/Compile
-    $(GO_HOST) build -o $(PKG_BUILD_DIR)/wormhole ./cmd
+    cd $(PKG_BUILD_DIR) && go build -o wormhole ./cmd
 endef
 
 define Package/wg_wormhole/install
