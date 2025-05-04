@@ -24,7 +24,6 @@ define Build/Prepare
     $(CP) ./cmd $(PKG_BUILD_DIR)/cmd
     $(CP) ./go.mod $(PKG_BUILD_DIR)/go.mod
     $(CP) ./go.sum $(PKG_BUILD_DIR)/go.sum
-    cd $(PKG_BUILD_DIR) && go mod tidy
 endef
 
 define Build/Compile
